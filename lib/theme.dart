@@ -26,7 +26,7 @@ class AppTheme {
           fontWeight: FontWeight.w700
         ),
       ),
-      colorScheme: ColorScheme.light(
+      colorScheme: const ColorScheme.light(
         primary: primaryGreen,
         error: primaryRed,
         surface: Colors.white,

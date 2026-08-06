@@ -23,11 +23,11 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(
+        title: const Row(
           children: [
             Icon(Icons.book, color: AppTheme.primaryGreen),
-            const SizedBox(width: 8),
-            const Text('OK Book'),
+            SizedBox(width: 8),
+            Text('OK Book'),
           ],
         ),
       ),
@@ -41,7 +41,7 @@ class DashboardScreen extends ConsumerWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04), // Fixed deprecated withOpacity
+                  color: Colors.black.withValues(alpha: 0.04), 
                   blurRadius: 24,
                   offset: const Offset(0, 8),
                 )
@@ -60,13 +60,13 @@ class DashboardScreen extends ConsumerWidget {
             ),
           ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.1),
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('CUSTOMERS', style: TextStyle(color: AppTheme.textLight, fontSize: 12, fontWeight: FontWeight.bold)),
-                const Icon(Icons.filter_list, size: 20, color: AppTheme.textLight),
+                Text('CUSTOMERS', style: TextStyle(color: AppTheme.textLight, fontSize: 12, fontWeight: FontWeight.bold)),
+                Icon(Icons.filter_list, size: 20, color: AppTheme.textLight),
               ],
             ),
           ),
@@ -80,7 +80,7 @@ class DashboardScreen extends ConsumerWidget {
                 return ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   leading: CircleAvatar(
-                    backgroundColor: AppTheme.primaryGreen.withValues(alpha: 0.1), // Fixed deprecated withOpacity
+                    backgroundColor: AppTheme.primaryGreen.withValues(alpha: 0.1),
                     child: Text(customer.name[0].toUpperCase(), style: const TextStyle(color: AppTheme.primaryGreen, fontWeight: FontWeight.bold)),
                   ),
                   title: Text(customer.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),

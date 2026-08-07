@@ -1,43 +1,50 @@
-name: Flutter Build CI
+name: Build Android Release APK
 
 on:
   push:
     branches:
       - main
+      - master
   pull_request:
     branches:
       - main
+      - master
 
 jobs:
   build:
+    name: Build APK
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v5
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Set up Flutter
+      - name: 🐦 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          channel: 'stable'
           cache: true
 
-      - name: Generate Missing Native Platform Folders
-        run: flutter create . --platforms=android
+      - name: 🛠️ Generate Platform Files
+        run: flutter create .
 
-      - name: Install Dependencies
+      - name: 📦 Install Dependencies
         run: flutter pub get
 
-      - name: Build Release APK
+      - name: 🔍 Check for Code Errors (Analyze)
+        run: flutter analyze
+
+      - name: 🏗️ Build APK
         run: flutter build apk --release
 
-      - name: Upload Artifact
+      - name: 📤 Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ok-book-release
+          name: gridsnap-release-apk
           path: build/app/outputs/flutter-apk/app-release.apk

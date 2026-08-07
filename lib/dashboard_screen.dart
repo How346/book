@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 import 'theme.dart';
 import 'models.dart';
 import 'providers.dart';
-import 'pdf_generator.dart';
 import 'customer_ledger_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {

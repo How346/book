@@ -14,7 +14,7 @@ class PdfService {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text('OK Book Statement', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+              pw.Text('OK Book Statement', style: const pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 20),
               pw.Text('Name: ${party.name}', style: const pw.TextStyle(fontSize: 18)),
               pw.Text('Phone: ${party.phone}', style: const pw.TextStyle(fontSize: 14)),

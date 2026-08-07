@@ -1,0 +1,4 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'app_state.dart';
+class TransactionScreen extends StatelessWidget{const TransactionScreen({super.key});@override Widget build(BuildContext c){final xs=c.watch<AppState>().txns;return Scaffold(appBar:AppBar(title:const Text('Transactions')),body:xs.isEmpty?const Center(child:Text('No transactions yet.')):ListView.builder(itemCount:xs.length,itemBuilder:(_,i){final t=xs[i];return ListTile(leading:CircleAvatar(child:Icon(t.type=='give'?Icons.arrow_upward:Icons.arrow_downward)),title:Text(t.partyName),subtitle:Text('${t.description.isEmpty?'Transaction':t.description} • ${t.method}'),trailing:Text('${t.type=='give'?'-':'+'} ₹${(t.amount/100).toStringAsFixed(2)}',style:TextStyle(fontWeight:FontWeight.bold,color:t.type=='give'?Colors.red:Colors.green));}));}}

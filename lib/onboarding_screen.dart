@@ -1,0 +1,9 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'app_state.dart';
+import 'business_setup_screen.dart';
+
+class OnboardingScreen extends StatefulWidget{const OnboardingScreen({super.key});@override State<OnboardingScreen> createState()=>_S();}
+class _S extends State<OnboardingScreen>{int i=0; final pages=[('Digital Khata','Track every give and receive in one simple place.',Icons.account_balance_wallet),('Customers & Suppliers','Keep party balances, statements and history organized.',Icons.people_alt),('Business Control','Expenses, stock, billing and reports — all offline.',Icons.insights)];
+@override Widget build(BuildContext c){final p=pages[i];return Scaffold(body:SafeArea(child:Padding(padding:const EdgeInsets.all(28),child:Column(children:[const Spacer(),Icon(p.$3,size:100,color:Colors.indigo),const SizedBox(height:30),Text(p.$1,style:const TextStyle(fontSize:28,fontWeight:FontWeight.bold)),const SizedBox(height:12),Text(p.$2,textAlign:TextAlign.center,style:const TextStyle(fontSize:16)),const Spacer(),Row(mainAxisAlignment:MainAxisAlignment.center,children:List.generate(pages.length,(x)=>Container(width:9,height:9,margin:const EdgeInsets.all(4),decoration:BoxDecoration(shape:BoxShape.circle,color:x==i?Colors.indigo:Colors.grey.shade300)))),const SizedBox(height:30),Row(children:[if(i>0)TextButton(onPressed:()=>setState(()=>i--),child:const Text('Back')),const Spacer(),TextButton(onPressed:()=>_start(c),child:Text(i==pages.length-1?'Get Started':'Skip')),FilledButton(onPressed:()=>i==pages.length-1?_start(c):setState(()=>i++),child:Text(i==pages.length-1?'Continue':'Next'))])])));}
+void _start(BuildContext c){c.read<AppState>().db.put('onboarded',true);Navigator.pushReplacement(c,MaterialPageRoute(builder:(_)=>const BusinessSetupScreen()));}}

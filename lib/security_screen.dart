@@ -1,0 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:local_auth/local_auth.dart';
+class SecurityScreen extends StatefulWidget{const SecurityScreen({super.key});@override State<SecurityScreen> createState()=>_S();}
+class _S extends State<SecurityScreen>{final pin=TextEditingController();bool bio=false;@override Widget build(BuildContext c)=>Scaffold(appBar:AppBar(title:const Text('Security')),body:ListView(padding:const EdgeInsets.all(20),children:[TextField(controller:pin,obscureText:true,keyboardType:TextInputType.number,decoration:const InputDecoration(labelText:'New PIN')),SwitchListTile(title:const Text('Biometric unlock'),value:bio,onChanged:(v)async{if(v){try{bio=await LocalAuthentication().canCheckBiometrics;}catch(_){bio=false;}}setState((){});}),const SizedBox(height:10),FilledButton(onPressed:()async{if(pin.text.length<4)return;final p=await SharedPreferences.getInstance();await p.setString('pin',pin.text);if(c.mounted)ScaffoldMessenger.of(c).showSnackBar(const SnackBar(content:Text('PIN saved securely in app preferences.')));},child:const Text('Save PIN'))]));}}

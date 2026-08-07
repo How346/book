@@ -1,0 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'app_state.dart';
+class ReportsScreen extends StatelessWidget{const ReportsScreen({super.key});@override Widget build(BuildContext c){final s=c.watch<AppState>();final expenses=s.expenses.fold(0,(a,e)=>a+e.amount);return Scaffold(appBar:AppBar(title:const Text('Reports')),body:ListView(padding:const EdgeInsets.all(16),children:[_R('Receivable',s.receivable),_R('Payable',s.payable),_R('Today received',s.todayReceived),_R('Today given',s.todayGiven),_R('Total expenses',expenses),Card(child:Padding(padding:const EdgeInsets.all(18),child:Text('Reports are calculated from your local ledger. Add transactions to see live figures.')))]));}}
+class _R extends StatelessWidget{final String t;final int v;const _R(this.t,this.v);@override Widget build(BuildContext c)=>Card(child:ListTile(title:Text(t),trailing:Text('₹${(v/100).toStringAsFixed(2)}',style:const TextStyle(fontWeight:FontWeight.bold,fontSize:18))));}

@@ -46,9 +46,9 @@ class DashboardScreen extends ConsumerWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _BalCol('You will give', totalGive, AppTheme.primaryRed),
+                      _balCol('You will give', totalGive, AppTheme.primaryRed),
                       Container(width: 1, height: 40, color: Colors.grey),
-                      _BalCol('You will get', totalGet, AppTheme.primaryGreen),
+                      _balCol('You will get', totalGet, AppTheme.primaryGreen),
                     ],
                   ),
                 ),
@@ -87,7 +87,7 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _BalCol(String title, int paise, Color c) {
+  Widget _balCol(String title, int paise, Color c) {
     return Column(
       children: [
         Text(title, style: const TextStyle(color: Colors.grey)),
@@ -142,7 +142,6 @@ class LedgerScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // We should ideally watch a specific provider for this party's balance update, but for simplicity we rely on the list provider and transactions provider.
     final txsAsync = ref.watch(transactionsProvider(party.id));
     final updatedParty = ref.watch(partiesProvider).valueOrNull?.firstWhere((p) => p.id == party.id, orElse: () => party) ?? party;
 

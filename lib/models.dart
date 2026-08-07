@@ -1,5 +1,3 @@
-import 'package:uuid/uuid.dart';
-
 enum PartyType { customer, supplier }
 
 class Party {

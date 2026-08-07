@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'ledger_models.dart';
+import 'models.dart';
 import 'theme.dart';
 
 class CustomerLedgerScreen extends StatelessWidget {
-  final Customer customer;
-  const CustomerLedgerScreen({super.key, required this.customer});
+  final Party party;
+  const CustomerLedgerScreen({super.key, required this.party});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(customer.name),
+        title: Text(party.name),
         backgroundColor: Colors.white,
       ),
       body: Center(
         child: Text(
-          'Ledger for ${customer.name}',
+          'Ledger for ${party.name}',
           style: const TextStyle(fontSize: 18, color: AppTheme.textDark),
         ),
       ),

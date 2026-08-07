@@ -21,7 +21,7 @@ class PdfService {
               pw.Text('Net Balance: ₹${(party.balancePaise.abs() / 100).toStringAsFixed(2)} ${party.balancePaise >= 0 ? '(Get)' : '(Give)'}'),
               pw.SizedBox(height: 20),
               pw.TableHelper.fromTextArray(
-                headers: ['Date', 'Note', 'Amount (Give)', 'Amount (Get)'],
+                headers: const ['Date', 'Note', 'Amount (Give)', 'Amount (Get)'],
                 data: txs.map((tx) {
                   final amt = '₹${(tx.amountPaise / 100).toStringAsFixed(2)}';
                   return [

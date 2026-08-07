@@ -91,7 +91,6 @@ class DatabaseHelper {
       final res = await txn.query('parties', columns: ['balancePaise'], where: 'id = ?', whereArgs: [tx.partyId]);
       if (res.isNotEmpty) {
         int currentBal = res.first['balancePaise'] as int;
-        // isGot = payment received (reduces pending balance)
         int diff = tx.isGot ? -tx.amountPaise : tx.amountPaise;
         int newBal = currentBal + diff;
         await txn.update('parties', {'balancePaise': newBal}, where: 'id = ?', whereArgs: [tx.partyId]);

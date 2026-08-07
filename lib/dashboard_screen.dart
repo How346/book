@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:uuid/uuid.dart';
 import 'theme.dart';
-import 'ledger_provider.dart';
+import 'models.dart';
+import 'providers.dart';
+import 'pdf_generator.dart';
 import 'customer_ledger_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -11,120 +13,126 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final customers = ref.watch(ledgerProvider);
-    
-    double totalToGive = 0;
-    double totalToGet = 0;
-    
-    for (var c in customers) {
-      if (c.balance > 0) totalToGet += c.balance;
-      if (c.balance < 0) totalToGive += c.balance.abs();
-    }
+    final partiesState = ref.watch(partiesProvider);
+    final settings = ref.watch(settingsProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
-          children: [
-            Icon(Icons.book, color: AppTheme.primaryGreen),
-            SizedBox(width: 8),
-            Text('OK Book'),
-          ],
-        ),
-      ),
-      body: Column(
-        children: [
-          Container(
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04), 
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
-                )
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _buildSummaryItem('You will give', '₹${totalToGive.toStringAsFixed(0)}', AppTheme.primaryRed),
-                ),
-                Container(width: 1, height: 40, color: Colors.grey.shade300),
-                Expanded(
-                  child: _buildSummaryItem('You will get', '₹${totalToGet.toStringAsFixed(0)}', AppTheme.primaryGreen),
-                ),
-              ],
-            ),
-          ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.1),
-
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('CUSTOMERS', style: TextStyle(color: AppTheme.textLight, fontSize: 12, fontWeight: FontWeight.bold)),
-                Icon(Icons.filter_list, size: 20, color: AppTheme.textLight),
-              ],
-            ),
-          ),
-
-          Expanded(
-            child: ListView.separated(
-              itemCount: customers.length,
-              separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade200),
-              itemBuilder: (context, index) {
-                final customer = customers[index];
-                return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  leading: CircleAvatar(
-                    backgroundColor: AppTheme.primaryGreen.withValues(alpha: 0.1),
-                    child: Text(customer.name[0].toUpperCase(), style: const TextStyle(color: AppTheme.primaryGreen, fontWeight: FontWeight.bold)),
-                  ),
-                  title: Text(customer.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-                  subtitle: Text(
-                    customer.transactions.isNotEmpty ? DateFormat('dd MMM, hh:mm a').format(customer.transactions.last.date) : 'No transactions',
-                    style: const TextStyle(color: AppTheme.textLight, fontSize: 13),
-                  ),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text('₹${customer.balance.abs().toStringAsFixed(0)}', 
-                        style: TextStyle(
-                          color: customer.balance >= 0 ? AppTheme.primaryGreen : AppTheme.primaryRed,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16
-                        )
-                      ),
-                      Text(customer.balance >= 0 ? 'Advance' : 'Due', style: const TextStyle(color: AppTheme.textLight, fontSize: 11)),
-                    ],
-                  ),
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CustomerLedgerScreen(customer: customer))),
-                ).animate().fadeIn(delay: (100 * index).ms).slideX();
-              },
-            ),
+        title: const Text('OK Book Pro', style: TextStyle(fontWeight: FontWeight.bold)),
+        actions: [
+          IconButton(
+            icon: Icon(settings['isDark'] ? Icons.light_mode : Icons.dark_mode),
+            onPressed: () => ref.read(settingsProvider.notifier).toggleTheme(),
           ),
         ],
       ),
+      body: partiesState.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, st) => Center(child: Text('Error: $err')),
+        data: (parties) {
+          int totalGet = 0;
+          int totalGive = 0;
+          for (var p in parties) {
+            if (p.balancePaise > 0) totalGet += p.balancePaise;
+            if (p.balancePaise < 0) totalGive += p.balancePaise.abs();
+          }
+
+          return Column(
+            children: [
+              Card(
+                margin: const EdgeInsets.all(16),
+                elevation: 4,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _balCol('You will give', totalGive, AppTheme.primaryRed),
+                      Container(width: 1, height: 40, color: Colors.grey),
+                      _balCol('You will get', totalGet, AppTheme.primaryGreen),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: parties.length,
+                  itemBuilder: (ctx, i) {
+                    final p = parties[i];
+                    return ListTile(
+                      leading: CircleAvatar(child: Text(p.name[0].toUpperCase())),
+                      title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(p.phone),
+                      trailing: Text(
+                        '₹${(p.balancePaise.abs() / 100).toStringAsFixed(2)}',
+                        style: TextStyle(
+                          color: p.balancePaise >= 0 ? AppTheme.primaryGreen : AppTheme.primaryRed,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CustomerLedgerScreen(party: p))),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
+      ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppTheme.primaryRed,
-        onPressed: () {},
-        icon: const Icon(Icons.person_add, color: Colors.white),
-        label: const Text('ADD CUSTOMER', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        onPressed: () => _showAddDialog(context, ref),
+        icon: const Icon(Icons.person_add),
+        label: const Text('Add Party'),
       ),
     );
   }
 
-  Widget _buildSummaryItem(String title, String amount, Color color) {
+  Widget _balCol(String title, int paise, Color c) {
     return Column(
       children: [
-        Text(title, style: const TextStyle(color: AppTheme.textLight, fontSize: 13, fontWeight: FontWeight.w500)),
-        const SizedBox(height: 8),
-        Text(amount, style: TextStyle(color: color, fontSize: 22, fontWeight: FontWeight.bold)),
+        Text(title, style: const TextStyle(color: Colors.grey)),
+        const SizedBox(height: 4),
+        Text('₹${(paise / 100).toStringAsFixed(2)}', style: TextStyle(color: c, fontSize: 20, fontWeight: FontWeight.bold)),
       ],
+    );
+  }
+
+  void _showAddDialog(BuildContext context, WidgetRef ref) {
+    final nameCtrl = TextEditingController();
+    final phoneCtrl = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Add Customer/Supplier'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Name')),
+            TextField(controller: phoneCtrl, decoration: const InputDecoration(labelText: 'Phone'), keyboardType: TextInputType.phone),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              if (nameCtrl.text.isNotEmpty) {
+                final p = Party(
+                  id: const Uuid().v4(),
+                  name: nameCtrl.text,
+                  phone: phoneCtrl.text,
+                  type: PartyType.customer,
+                  balancePaise: 0,
+                  createdAt: DateTime.now(),
+                );
+                ref.read(partiesProvider.notifier).addParty(p);
+                Navigator.pop(ctx);
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
     );
   }
 }
